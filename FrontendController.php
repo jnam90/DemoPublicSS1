@@ -64,11 +64,7 @@ class FrontendController extends Controller
         return view('register'); 
     }
  
-    public function verify(Request $request) {
-        $email = session()->get('email');
-        if(!$email) {
-            return redirect()->route('register');   
-        }  
+    public function verify(Request $request) {         
         if ($request->isMethod('post')) { 
             $validator = Validator::make($request->all(), [
                 'verification_code' => 'required',
@@ -100,11 +96,7 @@ class FrontendController extends Controller
  
     } 
     
-    public function doctorInfo(Request $request) {
-        $id = session()->get('id');
-        if(!$id){
-            return redirect()->route('register');
-        }  
+    public function doctorInfo(Request $request) {        
         $data = Doctor::checkDoctorExist($id);
         if(!$data) { 
             return redirect()->route('register');
@@ -154,11 +146,7 @@ class FrontendController extends Controller
 
     }
     
-    public function patientInfo(Request $request) {
-        $doctor_id = session()->get('doctor_id');
-        if(!$doctor_id){ 
-            return redirect()->route('register');  
-        }  
+    public function patientInfo(Request $request) {        
         $arrAge = Doctor::generateListAge();
         $arrGender = Doctor::$gender;
         $arrDrinker = Doctor::$drinker;
@@ -216,11 +204,7 @@ class FrontendController extends Controller
   
     }
  
-    public function beforeandafterphoto(Request $request) {
-        $patientid = session()->get('patientid');
-        if(!$patientid){ 
-            return redirect()->route('register'); 
-        }  
+    public function beforeandafterphoto(Request $request) {        
 
         if ($request->isMethod('post')) { 
             $validator = Validator::make($request->all(), [
@@ -274,11 +258,7 @@ class FrontendController extends Controller
         return view('beforeandafter-photo');   
     } 
 
-    public function procedureDetail(Request $request) { 
-        $image_id =  session()->get('image_id');
-        if(!$image_id){ 
-            return redirect()->route('register'); 
-        }  
+    public function procedureDetail(Request $request) {          
         $list_image = BeforeAfterImage::where("id", $image_id)->first(); 
         $location = Submission::$location;
         $treatmentarea = Submission::$treatmentarea;
