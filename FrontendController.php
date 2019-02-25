@@ -51,6 +51,41 @@ class FrontendController extends Controller
         }
     }
     
+    public function verify(Request $request) {
+        $email = session()->get('email');
+        if(!$email) {
+            return redirect()->route('register');   
+        }  
+        if (!$request->isMethod('post')) { 
+             return view('verify');   
+        }        
+        
+        $validator = Validator::make($request->all(), [
+                'verification_code' => 'required',
+                ]);   
+            if ($validator->fails()) {
+                if ($validator->fails()) {
+                    return redirect()->route('verify')
+                                ->withErrors($validator) 
+                                ->withInput();
+                }  
+            }  
+            $verification_code = $request->verification_code;
+            $data = Doctor::checkVerificationCode(['email' => $email, 'code' => $verification_code]);
+            if($data) { 
+                session()->forget('email');
+                session()->put('id', $data->id); 
+                $data->update(['status' => 1]);  
+                return redirect()->route('doctorinfo');  
+            } 
+            else {  
+                $validator->errors()->add('error', 'Verification code invalid!');
+                return redirect()->route('verify')
+                            ->withErrors($validator)
+                            ->withInput(); 
+            }  
+    } 
+    
     public function beforeandafterPhotocontest(Request $request) {
         return view('beforeandafter-photo-contest');
     }    
