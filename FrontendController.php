@@ -17,11 +17,7 @@ class FrontendController extends Controller
     public function register(Request $request)
     {
         if ($request->isMethod('post')) {
-            $validator = Validator::make($request->all(), [
-                    'firstname' => 'required',
-                    'familyname' => 'required',
-                    'email' => 'required|email',
-                    ]);
+            $validator = Validator::make($request->all(), ['firstname' => 'required', 'familyname' => 'required', 'email' => 'required|email',]);
             if ($validator->fails()) {
                 if ($validator->fails()) {
                     return redirect()->route('register')
@@ -30,7 +26,7 @@ class FrontendController extends Controller
                 }
             }
 
-            $checkEmail = Doctor::checkEmailExist($request->email); 
+            /*$checkEmail = Doctor::checkEmailExist($request->email); 
             if($checkEmail) { 
                 $validator->errors()->add('error', 'Email registed!');
                 return redirect()->route('register')
@@ -59,7 +55,7 @@ class FrontendController extends Controller
                 return redirect()->route('register')
                             ->withErrors($validator)
                             ->withInput();
-            }  
+            }*/
  
         } 
         return view('register'); 
