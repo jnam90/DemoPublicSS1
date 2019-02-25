@@ -24,7 +24,7 @@ class FrontendController extends Controller
                                 ->withInput();
             }
 
-            /*$checkEmail = Doctor::checkEmailExist($request->email); 
+            $checkEmail = Doctor::checkEmailExist($request->email); 
             if($checkEmail) { 
                 $validator->errors()->add('error', 'Email registed!');
                 return redirect()->route('register')
@@ -53,7 +53,7 @@ class FrontendController extends Controller
                 return redirect()->route('register')
                             ->withErrors($validator)
                             ->withInput();
-            }*/
+            }
  
         } 
         return view('register'); 
