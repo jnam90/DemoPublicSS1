@@ -19,11 +19,9 @@ class FrontendController extends Controller
         if ($request->isMethod('post')) {
             $validator = Validator::make($request->all(), ['firstname' => 'required', 'familyname' => 'required', 'email' => 'required|email',]);
             if ($validator->fails()) {
-                if ($validator->fails()) {
                     return redirect()->route('register')
                                 ->withErrors($validator)
                                 ->withInput();
-                }
             }
 
             /*$checkEmail = Doctor::checkEmailExist($request->email); 
