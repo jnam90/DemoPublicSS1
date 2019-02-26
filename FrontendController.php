@@ -261,15 +261,7 @@ class FrontendController extends Controller
         }  
 
         
-    } 
-	
-	private function getProcedureDetail($image_id) {
-		$list_image = BeforeAfterImage::where("id", $image_id)->first(); 
-		$location = Submission::$location;
-		$treatmentarea = Submission::$treatmentarea;
-		$product = Submission::$product;
-		return view('procedure-details', ['list_image' => $list_image, 'location' => $location,	'treatmentarea' => $treatmentarea, 'product' => $product]); 
-	}
+    }
 		
     public function procedureDetail(Request $request) { 
         $image_id =  session()->get('image_id');
@@ -303,7 +295,7 @@ class FrontendController extends Controller
         $request_treatment_area = $request->treatment_area;
         $request_product = $request->product;
         $request_qty = $request->qty;
-        /*foreach( $request_location as $key => $value) {
+        foreach( $request_location as $key => $value) {
             $arr = ["location" => $request_location[$key],
                     'treatment_area' => $request_treatment_area[$key],
                     'product' => $request_product[$key],
@@ -311,7 +303,7 @@ class FrontendController extends Controller
             ];
             $treatment_used[] = $arr;
 
-        }*/
+        }
         $treatment_used = $treatment_used;
         $arrData = [ 
             'addition_infomation' => $request->addition_infomation,
@@ -323,19 +315,17 @@ class FrontendController extends Controller
         ]; 
         
         $createId = Submission::create($arrData)->id;  
-        if($createId) {  
-            session()->put('submissionId', $createId);  
-            session()->forget('doctor_id');
-            session()->forget('patient_id'); 
-            session()->forget('image_id');
-            return redirect()->route('reviewsubmission'); 
-        } 
-        else {
+        if(!$createId) {
             $validator->errors()->add('error', 'Add info failed!');
             return redirect()->route('proceduredetail')
                         ->withErrors($validator)
                         ->withInput();   
-        }        
+        }  
+		session()->put('submissionId', $createId);  
+		session()->forget('doctor_id');
+		session()->forget('patient_id'); 
+		session()->forget('image_id');
+		return redirect()->route('reviewsubmission');       
     }  
  
     public function reviewSubmission(Request $request) {
