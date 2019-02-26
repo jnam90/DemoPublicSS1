@@ -108,7 +108,6 @@ class FrontendController extends Controller
         } 
         $listSpecialty = Doctor::$specialty;
         $listCountry = Doctor::$country;  
-
         if (!$request->isMethod('post')) { 
             return view('doctor-information', ['listCountry' => $listCountry, 'listSpecialty' => $listSpecialty]); 
  
@@ -147,9 +146,6 @@ class FrontendController extends Controller
                         ->withInput();  
         }
 
-
-        
-
     }
     
     public function patientInfo(Request $request) {
@@ -157,17 +153,16 @@ class FrontendController extends Controller
         if(!$doctor_id){ 
             return redirect()->route('register');  
         }  
-        $arrAge = Doctor::generateListAge();
-        $arrGender = Doctor::$gender;
-        $arrDrinker = Doctor::$drinker;
-        $arrSmoker = Doctor::$smoker;
-        $arrRace = Doctor::$race; 
-
+       
         if (!$request->isMethod('post')) { 
+             $arrAge = Doctor::generateListAge();
+            $arrGender = Doctor::$gender;
+            $arrDrinker = Doctor::$drinker;
+            $arrSmoker = Doctor::$smoker;
+            $arrRace = Doctor::$race; 
             return view('patient-information', ['arrAge' => $arrAge, 'arrGender' => $arrGender, 'arrDrinker'=>$arrDrinker,
         'arrSmoker'=>$arrSmoker, 'arrRace' => $arrRace ]);  
-           
-  
+
         }  
         $validator = Validator::make($request->all(), [
             'firstname' => 'required',
@@ -210,7 +205,6 @@ class FrontendController extends Controller
                         ->withErrors($validator)
                         ->withInput(); 
         }  
-        
   
     }
  
@@ -219,7 +213,6 @@ class FrontendController extends Controller
         if(!$patientid){ 
             return redirect()->route('register'); 
         }  
-
         if (!$request->isMethod('post')) { 
             return view('beforeandafter-photo');   
         } 
@@ -275,66 +268,66 @@ class FrontendController extends Controller
         if(!$image_id){ 
             return redirect()->route('register'); 
         }  
-        $list_image = BeforeAfterImage::where("id", $image_id)->first(); 
-        $location = Submission::$location;
-        $treatmentarea = Submission::$treatmentarea;
-        $product = Submission::$product;
         if (!$request->isMethod('post')) { 
+            $list_image = BeforeAfterImage::where("id", $image_id)->first(); 
+            $location = Submission::$location;
+            $treatmentarea = Submission::$treatmentarea;
+            $product = Submission::$product;
             return view('procedure-details', ['list_image' => $list_image, 'location' => $location,
         'treatmentarea' => $treatmentarea, 'product' => $product]); 
         } 
         $doctor_id = session()->get('doctor_id');
-            $patient_id = session()->get('patient_id');
-            $validator = Validator::make($request->all(), [
-                'location' => 'required',
-                'treatment_area' => 'required',
-                'product' => 'required',
-                'qty' => 'required',
-             
-                ]);   
-            if ($validator->fails()) {
-                return redirect()->route('proceduredetail')
-                            ->withErrors($validator) 
-                            ->withInput();
-            }  
-            $treatment_used = [];
-            $request_location = $request->location;
-            $request_treatment_area = $request->treatment_area;
-            $request_product = $request->product;
-            $request_qty = $request->qty;
-            foreach( $request_location as $key => $value) {
-                $arr = ["location" => $request_location[$key],
-                        'treatment_area' => $request_treatment_area[$key],
-                        'product' => $request_product[$key],
-                        'qty' => $request_qty[$key],
-                ];
-                $treatment_used[] = $arr;
+        $patient_id = session()->get('patient_id');
+        $validator = Validator::make($request->all(), [
+            'location' => 'required',
+            'treatment_area' => 'required',
+            'product' => 'required',
+            'qty' => 'required',
+         
+            ]);   
+        if ($validator->fails()) {
+            return redirect()->route('proceduredetail')
+                        ->withErrors($validator) 
+                        ->withInput();
+        }  
+        $treatment_used = [];
+        $request_location = $request->location;
+        $request_treatment_area = $request->treatment_area;
+        $request_product = $request->product;
+        $request_qty = $request->qty;
+        foreach( $request_location as $key => $value) {
+            $arr = ["location" => $request_location[$key],
+                    'treatment_area' => $request_treatment_area[$key],
+                    'product' => $request_product[$key],
+                    'qty' => $request_qty[$key],
+            ];
+            $treatment_used[] = $arr;
 
-            }
-            $treatment_used = $treatment_used;
-            $arrData = [ 
-                'addition_infomation' => $request->addition_infomation,
-                'doctor_id' => $doctor_id,
-                'patient_id' => $patient_id,
-                'image_id' => $image_id,
-                'treatment_used' => $treatment_used,  
-                
-            ]; 
+        }
+        $treatment_used = $treatment_used;
+        $arrData = [ 
+            'addition_infomation' => $request->addition_infomation,
+            'doctor_id' => $doctor_id,
+            'patient_id' => $patient_id,
+            'image_id' => $image_id,
+            'treatment_used' => $treatment_used,  
             
-            $createId = Submission::create($arrData)->id;  
-            if($createId) {  
-                session()->put('submissionId', $createId);  
-                session()->forget('doctor_id');
-                session()->forget('patient_id'); 
-                session()->forget('image_id');
-                return redirect()->route('reviewsubmission'); 
-            } 
-            else {
-                $validator->errors()->add('error', 'Add info failed!');
-                return redirect()->route('proceduredetail')
-                            ->withErrors($validator)
-                            ->withInput();   
-            }  
+        ]; 
+        
+        $createId = Submission::create($arrData)->id;  
+        if($createId) {  
+            session()->put('submissionId', $createId);  
+            session()->forget('doctor_id');
+            session()->forget('patient_id'); 
+            session()->forget('image_id');
+            return redirect()->route('reviewsubmission'); 
+        } 
+        else {
+            $validator->errors()->add('error', 'Add info failed!');
+            return redirect()->route('proceduredetail')
+                        ->withErrors($validator)
+                        ->withInput();   
+        }  
         
     }  
  
