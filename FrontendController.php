@@ -53,49 +53,46 @@ class FrontendController extends Controller
        
 		Mail::to($request->email)->send(new VerificationCode(['code' => $verification_code ])); 
 		session()->put('email', $request->email);   
-		go_redirect_route_success('verify');
+		go_redirect_route_completed('verify');
     }
  
     public function verify(Request $request) {
         $email = session()->get('email');
         if(!$email) {
-            return redirect()->route('register');   
+            return go_redirect_route_completed('register');   
         }  
         if (!$request->isMethod('post')) { 
             return view('verify');    
         }
-        $validator = Validator::make($request->all(), [
-            'verification_code' => 'required',
-            ]);   
+        $validator = Validator::make($request->all(), ['verification_code' => 'required',]);   
         if ($validator->fails()) {
-            return redirect()->route('verify')
-                        ->withErrors($validator) 
-                        ->withInput();
+            return go_redirect_route_error('verify', $validator);
         }  
         $verification_code = $request->verification_code;
         $data = Doctor::checkVerificationCode(['email' => $email, 'code' => $verification_code]);
         if(!$data) {
             $validator->errors()->add('error', 'Verification code invalid!');
-            return redirect()->route('verify')
-                        ->withErrors($validator)
-                        ->withInput(); 
+			return go_redirect_route_error('verify', $validator);
         }   
          
 		session()->forget('email');
 		session()->put('id', $data->id); 
 		$data->update(['status' => 1]);  
-		go_redirect_route_success('doctorinfo');  
+		go_redirect_route_completed('doctorinfo');  
     } 
     
     public function doctorInfo(Request $request) {
         $id = session()->get('id');
         /*if(!$id){
             return redirect()->route('register');
-        }*/  
+        }  
         $data = Doctor::checkDoctorExist($id);
         if(!$data) { 
             return redirect()->route('register');
-        }   
+        }*/ 
+		if(!$id || !Doctor::checkDoctorExist($id)){
+            return redirect()->route('register');
+        } 		
         if (!$request->isMethod('post')) { 
 			$listSpecialty = Doctor::$specialty;
 			$listCountry = Doctor::$country;
@@ -126,7 +123,7 @@ class FrontendController extends Controller
 		
 		session()->forget('id'); 
 		session()->put('doctor_id', $id);  
-		go_redirect_route_success('patientinfo');		
+		go_redirect_route_completed('patientinfo');		
     }
     
     public function patientInfo(Request $request) {
@@ -179,7 +176,7 @@ class FrontendController extends Controller
                         ->withInput(); 
         }
 		session()->put('patientid', $createId);  
-		go_redirect_route_success('beforeandafterphoto');
+		go_redirect_route_completed('beforeandafterphoto');
     }
 	
 	public function check_consent_form(Request $request, $arrData) {		 
@@ -237,7 +234,7 @@ class FrontendController extends Controller
 		session()->put('image_id', $createId);     
 		session()->put('patient_id', $patientid);  
 		session()->forget('patientid');  
-		go_redirect_route_success('proceduredetail');
+		go_redirect_route_completed('proceduredetail');
     }
 		
     public function procedureDetail(Request $request) { 
@@ -302,7 +299,7 @@ class FrontendController extends Controller
 		session()->forget('doctor_id');
 		session()->forget('patient_id'); 
 		session()->forget('image_id');
-		go_redirect_route_success('reviewsubmission');       
+		go_redirect_route_completed('reviewsubmission');       
     }  
  
     public function reviewSubmission(Request $request) {
@@ -318,7 +315,7 @@ class FrontendController extends Controller
         return view('beforeandafter-photo-contest');
     }
     	
-	private function go_redirect_route_success(string $func) {
+	private function go_redirect_route_completed(string $func) {
 	   return redirect()->route($func); 
 	}
 	
