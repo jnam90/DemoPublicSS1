@@ -179,11 +179,9 @@ class FrontendController extends Controller
             'drinker' => $request->drinker,
 
         ]; 
-        /*if(isset($request->consent_form) && $request->consent_form != "") {
-            $file = $request->consent_form;
-            $path = Common::uploadFile($file);
-            $arrData['consent_form']  = $path;  
-        } */
+        if(isset($request->consent_form) && $request->consent_form != "") {
+            $arrData['consent_form']  = Common::uploadFile($request->consent_form);  
+        }
         $createId = Patient::create($arrData)->id; 
         if(!$createId) {
             $validator->errors()->add('error', 'Add info failed!');
