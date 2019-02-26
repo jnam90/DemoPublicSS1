@@ -89,9 +89,9 @@ class FrontendController extends Controller
     
     public function doctorInfo(Request $request) {
         $id = session()->get('id');
-        if(!$id){
+        /*if(!$id){
             return redirect()->route('register');
-        }  
+        }*/  
         $data = Doctor::checkDoctorExist($id);
         if(!$data) { 
             return redirect()->route('register');
@@ -121,8 +121,7 @@ class FrontendController extends Controller
         $update = $data->update($arrData);
         if(!$update) {
             $validator->errors()->add('error', 'Add info failed!'); 
-			go_redirect_route_error('verify', $validator);
-			return;			
+			return go_redirect_route_error('verify', $validator);
         }
 		
 		session()->forget('id'); 
