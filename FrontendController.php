@@ -240,7 +240,7 @@ class FrontendController extends Controller
     public function procedureDetail(Request $request) { 
         $image_id =  session()->get('image_id');
         if(!$image_id){ 
-            return redirect()->route('register'); 
+            return go_redirect_route_completed('register'); 
         }  
         if (!$request->isMethod('post')) {
             //return getProcedureDetail($image_id); 
@@ -250,19 +250,11 @@ class FrontendController extends Controller
 			$product = Submission::$product;
 			return view('procedure-details', ['list_image' => $list_image, 'location' => $location,	'treatmentarea' => $treatmentarea, 'product' => $product]); 
         } 
-        $validator = Validator::make($request->all(), [
-            'location' => 'required',
-            'treatment_area' => 'required',
-            'product' => 'required',
-            'qty' => 'required',
-         
-        ]);  
+        $validator = Validator::make($request->all(), ['location' => 'required', 'treatment_area' => 'required', 'product' => 'required', 'qty' => 'required', ]);  
         if ($validator->fails()) {
-            return redirect()->route('proceduredetail')
-                        ->withErrors($validator) 
-                        ->withInput();
+            return go_redirect_route_error('proceduredetail', $validator);			
         }
-        $treatment_used = [];		
+        /*$treatment_used = [];		
         $doctor_id = session()->get('doctor_id');
         $patient_id = session()->get('patient_id');
         $request_location = $request->location;
@@ -276,24 +268,21 @@ class FrontendController extends Controller
                     'qty' => $request_qty[$key],
             ];
             $treatment_used[] = $arr;
-
         }
-        $treatment_used = $treatment_used;
+        $treatment_used = $treatment_used;*/
         $arrData = [ 
             'addition_infomation' => $request->addition_infomation,
             'doctor_id' => $doctor_id,
             'patient_id' => $patient_id,
             'image_id' => $image_id,
-            'treatment_used' => $treatment_used,  
+            'treatment_used' => create_treatment_used($request),  
             
         ]; 
         
         $createId = Submission::create($arrData)->id;  
         if(!$createId) {
             $validator->errors()->add('error', 'Add info failed!');
-            return redirect()->route('proceduredetail')
-                        ->withErrors($validator)
-                        ->withInput();   
+            return go_redirect_route_error('proceduredetail', $validator);	
         }  
 		session()->put('submissionId', $createId);  
 		session()->forget('doctor_id');
@@ -301,6 +290,25 @@ class FrontendController extends Controller
 		session()->forget('image_id');
 		go_redirect_route_completed('reviewsubmission');       
     }  
+	
+	private function create_treatment_used(Request $request) {
+		$treatment_used = [];		
+        $doctor_id = session()->get('doctor_id');
+        $patient_id = session()->get('patient_id');
+        $request_location = $request->location;
+        $request_treatment_area = $request->treatment_area;
+        $request_product = $request->product;
+        $request_qty = $request->qty;
+        foreach( $request_location as $key => $value) {
+            $arr = ["location" => $request_location[$key],
+                    'treatment_area' => $request_treatment_area[$key],
+                    'product' => $request_product[$key],
+                    'qty' => $request_qty[$key],
+            ];
+            $treatment_used[] = $arr;
+        }
+		return $treatment_used;
+	}
  
     public function reviewSubmission(Request $request) {
         $submissionId =  session()->get('submissionId');
