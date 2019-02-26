@@ -179,9 +179,10 @@ class FrontendController extends Controller
             'drinker' => $request->drinker,
 
         ]; 
-        if(isset($request->consent_form) && $request->consent_form != "") {
-            //$arrData['consent_form']  = Common::uploadFile($request->consent_form);  
-        }
+        /*if(isset($request->consent_form) && $request->consent_form != "") {
+            $arrData['consent_form']  = Common::uploadFile($request->consent_form);  
+        }*/
+		check_consent_form($request, $arrData);
 		
         $createId = Patient::create($arrData)->id; 
         if(!$createId) {
@@ -194,6 +195,12 @@ class FrontendController extends Controller
 		session()->put('patientid', $createId);  
 		return redirect()->route('beforeandafterphoto');  
     }
+	
+	public function check_consent_form(Request $request, $arrData) {		 
+        if(isset($request->consent_form) && $request->consent_form != "") {
+            $arrData['consent_form']  = Common::uploadFile($request->consent_form);  
+        }
+	}
  
     public function beforeandafterphoto(Request $request) {
         $patientid = session()->get('patientid');
