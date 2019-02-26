@@ -121,12 +121,13 @@ class FrontendController extends Controller
         $update = $data->update($arrData);
         if(!$update) {
             $validator->errors()->add('error', 'Add info failed!'); 
-			go_redirect_route_error('verify', $validator);			
-        } else {
-			session()->forget('id'); 
-			session()->put('doctor_id', $id);  
-			go_redirect_route_success('patientinfo');
-		}		
+			go_redirect_route_error('verify', $validator);
+			return;			
+        }
+		
+		session()->forget('id'); 
+		session()->put('doctor_id', $id);  
+		go_redirect_route_success('patientinfo');		
     }
     
     public function patientInfo(Request $request) {
