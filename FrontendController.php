@@ -119,13 +119,11 @@ class FrontendController extends Controller
             'mobile_number' => 'required'
             
             ]);   
-        if ($validator->fails()) { 
-            if ($validator->fails()) {
+        if ($validator->fails()) {
                 return redirect()->route('doctorinfo')
                             ->withErrors($validator) 
                             ->withInput();
-            }  
-        }  
+            }   
         $arrData = [
             'specialty' => $request->specialty,
             'country' => $request->country,
@@ -134,34 +132,29 @@ class FrontendController extends Controller
 
         ];
         $update = $data->update($arrData);
-        if($update) { 
-            session()->forget('id'); 
-            session()->put('doctor_id', $id);  
-            return redirect()->route('patientinfo');
-        }
-        else {
+        if(!$update) {
             $validator->errors()->add('error', 'Add info failed!');
             return redirect()->route('verify')
                         ->withErrors($validator)
                         ->withInput();  
         }
-
+		session()->forget('id'); 
+		session()->put('doctor_id', $id);  
+		return redirect()->route('patientinfo');
     }
     
     public function patientInfo(Request $request) {
         $doctor_id = session()->get('doctor_id');
         if(!$doctor_id){ 
             return redirect()->route('register');  
-        }  
-       
+        }       
         if (!$request->isMethod('post')) { 
              $arrAge = Doctor::generateListAge();
             $arrGender = Doctor::$gender;
             $arrDrinker = Doctor::$drinker;
             $arrSmoker = Doctor::$smoker;
             $arrRace = Doctor::$race; 
-            return view('patient-information', ['arrAge' => $arrAge, 'arrGender' => $arrGender, 'arrDrinker'=>$arrDrinker,
-        'arrSmoker'=>$arrSmoker, 'arrRace' => $arrRace ]);  
+            return view('patient-information', ['arrAge' => $arrAge, 'arrGender' => $arrGender, 'arrDrinker'=>$arrDrinker,'arrSmoker'=>$arrSmoker, 'arrRace' => $arrRace ]);  
 
         }  
         $validator = Validator::make($request->all(), [
@@ -195,17 +188,14 @@ class FrontendController extends Controller
             $arrData['consent_form']  = $path;  
         } 
         $createId = Patient::create($arrData)->id; 
-        if($createId) {  
-            session()->put('patientid', $createId);  
-            return redirect()->route('beforeandafterphoto');
-        } 
-        else {
+        if(!$createId) {
             $validator->errors()->add('error', 'Add info failed!');
             return redirect()->route('patientinfo')
                         ->withErrors($validator)
                         ->withInput(); 
         }  
-  
+		session()->put('patientid', $createId);  
+		return redirect()->route('beforeandafterphoto');  
     }
  
     public function beforeandafterphoto(Request $request) {
