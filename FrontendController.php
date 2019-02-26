@@ -303,7 +303,7 @@ class FrontendController extends Controller
         $request_treatment_area = $request->treatment_area;
         $request_product = $request->product;
         $request_qty = $request->qty;
-        foreach( $request_location as $key => $value) {
+        /*foreach( $request_location as $key => $value) {
             $arr = ["location" => $request_location[$key],
                     'treatment_area' => $request_treatment_area[$key],
                     'product' => $request_product[$key],
@@ -311,7 +311,7 @@ class FrontendController extends Controller
             ];
             $treatment_used[] = $arr;
 
-        }
+        }*/
         $treatment_used = $treatment_used;
         $arrData = [ 
             'addition_infomation' => $request->addition_infomation,
