@@ -190,10 +190,10 @@ class FrontendController extends Controller
             return redirect()->route('patientinfo')
                         ->withErrors($validator)
                         ->withInput(); 
-        }  
-		
-		session()->put('patientid', $createId);  
-		return redirect()->route('beforeandafterphoto');  
+        } else {
+			session()->put('patientid', $createId);  
+			return redirect()->route('beforeandafterphoto');  
+		}
     }
 	
 	public function check_consent_form(Request $request, $arrData) {		 
