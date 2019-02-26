@@ -105,10 +105,10 @@ class FrontendController extends Controller
         $data = Doctor::checkDoctorExist($id);
         if(!$data) { 
             return redirect()->route('register');
-        } 
-        $listSpecialty = Doctor::$specialty;
-        $listCountry = Doctor::$country;  
+        }   
         if (!$request->isMethod('post')) { 
+			$listSpecialty = Doctor::$specialty;
+			$listCountry = Doctor::$country;
             return view('doctor-information', ['listCountry' => $listCountry, 'listSpecialty' => $listSpecialty]); 
  
         }  
@@ -116,14 +116,13 @@ class FrontendController extends Controller
             'specialty' => 'required',
             'country' => 'required',
             'clinic_name' => 'required',
-            'mobile_number' => 'required'
-            
+            'mobile_number' => 'required'            
             ]);   
         if ($validator->fails()) {
                 return redirect()->route('doctorinfo')
                             ->withErrors($validator) 
                             ->withInput();
-            }   
+        }   
         $arrData = [
             'specialty' => $request->specialty,
             'country' => $request->country,
