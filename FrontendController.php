@@ -271,29 +271,34 @@ class FrontendController extends Controller
 		return view('procedure-details', ['list_image' => $list_image, 'location' => $location,	'treatmentarea' => $treatmentarea, 'product' => $product]); 
 	}
 		
-
     public function procedureDetail(Request $request) { 
         $image_id =  session()->get('image_id');
         if(!$image_id){ 
             return redirect()->route('register'); 
         }  
         if (!$request->isMethod('post')) {
-            return getProcedureDetail($image_id); 
+            //return getProcedureDetail($image_id); 
+			$list_image = BeforeAfterImage::where("id", $image_id)->first(); 
+			$location = Submission::$location;
+			$treatmentarea = Submission::$treatmentarea;
+			$product = Submission::$product;
+			return view('procedure-details', ['list_image' => $list_image, 'location' => $location,	'treatmentarea' => $treatmentarea, 'product' => $product]); 
         } 
-        $doctor_id = session()->get('doctor_id');
-        $patient_id = session()->get('patient_id');
-        /*$validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'location' => 'required',
             'treatment_area' => 'required',
             'product' => 'required',
-            'qty' => 'required',         
-            ]);   
+            'qty' => 'required',
+         
+        ]);  
         if ($validator->fails()) {
             return redirect()->route('proceduredetail')
                         ->withErrors($validator) 
                         ->withInput();
-        } */ 
-        $treatment_used = [];
+        }
+        $treatment_used = [];		
+        $doctor_id = session()->get('doctor_id');
+        $patient_id = session()->get('patient_id');
         $request_location = $request->location;
         $request_treatment_area = $request->treatment_area;
         $request_product = $request->product;
