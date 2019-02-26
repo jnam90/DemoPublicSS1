@@ -19,19 +19,19 @@ class FrontendController extends Controller
             return view('register'); 
  
         } 
-        $validator = Validator::make($request->all(), ['firstname' => 'required', 'familyname' => 'required', 'email' => 'required|email', ]);
+        $validator = Validator::make($request->all(), [
+			'firstname' => 'required', 
+			'familyname' => 'required', 
+			'email' => 'required|email',
+		]);
         if ($validator->fails()) {
-            return redirect()->route('register')
-                        ->withErrors($validator)
-                        ->withInput();
+			return go_redirect_route_error('register', $validator);
         }
 
         $checkEmail = Doctor::checkEmailExist($request->email); 
         if($checkEmail) { 
             $validator->errors()->add('error', 'Email registed!');
-            return redirect()->route('register')
-                        ->withErrors($validator)
-                        ->withInput(); 
+			return go_redirect_route_error('register', $validator);
         }
 
         $verification_code = Doctor::generateCode();
@@ -41,14 +41,11 @@ class FrontendController extends Controller
             'email' => $request->email,
             'status' => 0,
             'verification_code' => $verification_code
-
         ];
         $create = Doctor::create($data); 
         if(!$create) {
             $validator->errors()->add('error', 'Register failed!');
-            return redirect()->route('register')
-                        ->withErrors($validator)
-                        ->withInput();
+			return go_redirect_route_error('register', $validator);
         }  
        
 		Mail::to($request->email)->send(new VerificationCode(['code' => $verification_code ])); 
@@ -103,11 +100,9 @@ class FrontendController extends Controller
             'country' => 'required',
             'clinic_name' => 'required',
             'mobile_number' => 'required'            
-            ]);   
+        ]);   
         if ($validator->fails()) {
-			return redirect()->route('doctorinfo')
-						->withErrors($validator) 
-						->withInput();
+			return go_redirect_route_error('doctorinfo', $validator);
         }   
         $arrData = [
             'specialty' => $request->specialty,
@@ -129,7 +124,7 @@ class FrontendController extends Controller
     public function patientInfo(Request $request) {
         $doctor_id = session()->get('doctor_id');
         if(!$doctor_id){ 
-            return redirect()->route('register');  
+            return go_redirect_route_completed('register');  
         }       
         if (!$request->isMethod('post')) {             
 			return get_patient_information();
@@ -144,9 +139,7 @@ class FrontendController extends Controller
             'drinker'  => 'required',            
             ]);   
         if ($validator->fails()) {
-            return redirect()->route('patientinfo')
-                        ->withErrors($validator) 
-                        ->withInput();
+			return go_redirect_route_error('patientinfo', $validator);
         }   
         $arrData = [ 
             'firstname' => $request->firstname,
@@ -158,17 +151,15 @@ class FrontendController extends Controller
             'drinker' => $request->drinker,
 
         ]; 
-        /*if(isset($request->consent_form) && $request->consent_form != "") {
+        if(isset($request->consent_form) && $request->consent_form != "") {
             $arrData['consent_form']  = Common::uploadFile($request->consent_form);  
-        }*/
-		check_consent_form($request, $arrData);
+        }
+		//check_consent_form($request, $arrData);
 		
         $createId = Patient::create($arrData)->id; 
         if(!$createId) {
             $validator->errors()->add('error', 'Add info failed!');
-            return redirect()->route('patientinfo')
-                        ->withErrors($validator)
-                        ->withInput(); 
+			return go_redirect_route_error('patientinfo', $validator);
         }
 		session()->put('patientid', $createId);  
 		go_redirect_route_completed('beforeandafterphoto');
@@ -183,7 +174,7 @@ class FrontendController extends Controller
 		return view('patient-information', ['arrAge' => $arrAge, 'arrGender' => $arrGender, 'arrDrinker'=>$arrDrinker,'arrSmoker'=>$arrSmoker, 'arrRace' => $arrRace ]);  
 	}
 	
-	public function check_consent_form(Request $request, $arrData) {		 
+	private function check_consent_form(Request $request, $arrData) {		 
         if(isset($request->consent_form) && $request->consent_form != "") {
             $arrData['consent_form']  = Common::uploadFile($request->consent_form);  
         }
@@ -207,10 +198,9 @@ class FrontendController extends Controller
 
         ]);   
         if ($validator->fails()) {
-            return redirect()->route('beforeandafterphoto')
-                        ->withErrors($validator) 
-                        ->withInput(); 
+			return go_redirect_route_error('beforeandafterphoto', $validator);
         }  
+		
         $path_before_left_profile = Common::uploadFile($request->before_left_profile,'images');
         $path_before_frontal = Common::uploadFile($request->before_frontal,'images');
         $path_before_right_oblique = Common::uploadFile($request->before_right_oblique,'images');
@@ -230,9 +220,7 @@ class FrontendController extends Controller
         $createId = BeforeAfterImage::create($arrData)->id;
         if(!$createId) {
             $validator->errors()->add('error', 'Upload failed!');
-            return redirect()->route('beforeandafterphoto')
-                        ->withErrors($validator)
-                        ->withInput(); 
+			return go_redirect_route_error('beforeandafterphoto', $validator);
         } 
         
 		session()->put('image_id', $createId);     
@@ -258,8 +246,7 @@ class FrontendController extends Controller
             'doctor_id' => $doctor_id,
             'patient_id' => $patient_id,
             'image_id' => $image_id,
-            'treatment_used' => create_treatment_used($request),  
-            
+            'treatment_used' => create_treatment_used($request),              
         ]; 
         
         $createId = Submission::create($arrData)->id;  
