@@ -262,19 +262,23 @@ class FrontendController extends Controller
 
         
     } 
+	
+	private function getProcedureDetail($image_id) {
+		$list_image = BeforeAfterImage::where("id", $image_id)->first(); 
+		$location = Submission::$location;
+		$treatmentarea = Submission::$treatmentarea;
+		$product = Submission::$product;
+		return view('procedure-details', ['list_image' => $list_image, 'location' => $location,	'treatmentarea' => $treatmentarea, 'product' => $product]); 
+	}
+		
 
     public function procedureDetail(Request $request) { 
         $image_id =  session()->get('image_id');
         if(!$image_id){ 
             return redirect()->route('register'); 
         }  
-        if (!$request->isMethod('post')) { 
-            $list_image = BeforeAfterImage::where("id", $image_id)->first(); 
-            $location = Submission::$location;
-            $treatmentarea = Submission::$treatmentarea;
-            $product = Submission::$product;
-            return view('procedure-details', ['list_image' => $list_image, 'location' => $location,
-        'treatmentarea' => $treatmentarea, 'product' => $product]); 
+        if (!$request->isMethod('post')) {
+            return getProcedureDetail($image_id); 
         } 
         $doctor_id = session()->get('doctor_id');
         $patient_id = session()->get('patient_id');
@@ -282,8 +286,7 @@ class FrontendController extends Controller
             'location' => 'required',
             'treatment_area' => 'required',
             'product' => 'required',
-            'qty' => 'required',
-         
+            'qty' => 'required',         
             ]);   
         if ($validator->fails()) {
             return redirect()->route('proceduredetail')
@@ -327,8 +330,7 @@ class FrontendController extends Controller
             return redirect()->route('proceduredetail')
                         ->withErrors($validator)
                         ->withInput();   
-        }  
-        
+        }        
     }  
  
     public function reviewSubmission(Request $request) {
