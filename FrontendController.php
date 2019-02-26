@@ -19,11 +19,7 @@ class FrontendController extends Controller
             return view('register'); 
  
         } 
-        $validator = Validator::make($request->all(), [
-            'firstname' => 'required',
-            'familyname' => 'required',
-            'email' => 'required|email',
-            ]);
+        $validator = Validator::make($request->all(), ['firstname' => 'required', 'familyname' => 'required', 'email' => 'required|email', ]);
         if ($validator->fails()) {
             return redirect()->route('register')
                         ->withErrors($validator)
@@ -57,7 +53,7 @@ class FrontendController extends Controller
        
 		Mail::to($request->email)->send(new VerificationCode(['code' => $verification_code ])); 
 		session()->put('email', $request->email);   
-		go_redirect_route('verify');
+		go_redirect_route_success('verify');
     }
  
     public function verify(Request $request) {
@@ -88,7 +84,7 @@ class FrontendController extends Controller
 		session()->forget('email');
 		session()->put('id', $data->id); 
 		$data->update(['status' => 1]);  
-		go_redirect_route('doctorinfo');  
+		go_redirect_route_success('doctorinfo');  
     } 
     
     public function doctorInfo(Request $request) {
@@ -103,8 +99,7 @@ class FrontendController extends Controller
         if (!$request->isMethod('post')) { 
 			$listSpecialty = Doctor::$specialty;
 			$listCountry = Doctor::$country;
-            return view('doctor-information', ['listCountry' => $listCountry, 'listSpecialty' => $listSpecialty]); 
- 
+            return view('doctor-information', ['listCountry' => $listCountry, 'listSpecialty' => $listSpecialty]);  
         }  
         $validator = Validator::make($request->all(), [
             'specialty' => 'required',
@@ -113,16 +108,15 @@ class FrontendController extends Controller
             'mobile_number' => 'required'            
             ]);   
         if ($validator->fails()) {
-                return redirect()->route('doctorinfo')
-                            ->withErrors($validator) 
-                            ->withInput();
+			return redirect()->route('doctorinfo')
+						->withErrors($validator) 
+						->withInput();
         }   
         $arrData = [
             'specialty' => $request->specialty,
             'country' => $request->country,
             'clinic_name' => $request->clinic_name,
             'mobile_number' => $request->mobile_number,
-
         ];
         $update = $data->update($arrData);
         if(!$update) {
@@ -133,7 +127,7 @@ class FrontendController extends Controller
         }
 		session()->forget('id'); 
 		session()->put('doctor_id', $id);  
-		go_redirect_route('patientinfo');
+		go_redirect_route_success('patientinfo');
     }
     
     public function patientInfo(Request $request) {
@@ -186,7 +180,7 @@ class FrontendController extends Controller
                         ->withInput(); 
         }
 		session()->put('patientid', $createId);  
-		go_redirect_route('beforeandafterphoto');
+		go_redirect_route_success('beforeandafterphoto');
     }
 	
 	public function check_consent_form(Request $request, $arrData) {		 
@@ -244,7 +238,7 @@ class FrontendController extends Controller
 		session()->put('image_id', $createId);     
 		session()->put('patient_id', $patientid);  
 		session()->forget('patientid');  
-		go_redirect_route('proceduredetail');
+		go_redirect_route_success('proceduredetail');
     }
 		
     public function procedureDetail(Request $request) { 
@@ -309,7 +303,7 @@ class FrontendController extends Controller
 		session()->forget('doctor_id');
 		session()->forget('patient_id'); 
 		session()->forget('image_id');
-		go_redirect_route('reviewsubmission');       
+		go_redirect_route_success('reviewsubmission');       
     }  
  
     public function reviewSubmission(Request $request) {
@@ -325,8 +319,14 @@ class FrontendController extends Controller
         return view('beforeandafter-photo-contest');
     }
     	
-	private function go_redirect_route(string $func) {
-	   return redirect()->route(func); 
+	private function go_redirect_route_success(string $func) {
+	   return redirect()->route($func); 
+	}
+	
+	private function go_redirect_route_error(string $func, $validator) {
+		return redirect()->route($func)
+                        ->withErrors($validator)
+                        ->withInput();   
 	}
 }
   
