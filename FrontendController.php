@@ -323,11 +323,11 @@ class FrontendController extends Controller
             session()->forget('doctor_id');
             session()->forget('patient_id'); 
             session()->forget('image_id');
-            return redirect()->route('reviewsubmission'); 
+            redirect()->route('reviewsubmission'); 
         } 
         else {
             $validator->errors()->add('error', 'Add info failed!');
-            return redirect()->route('proceduredetail')
+            redirect()->route('proceduredetail')
                         ->withErrors($validator)
                         ->withInput();   
         }        
