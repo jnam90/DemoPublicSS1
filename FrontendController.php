@@ -48,19 +48,16 @@ class FrontendController extends Controller
 
         ];
         $create = Doctor::create($data); 
-        if($create) {
-            Mail::to($request->email)->send(new VerificationCode(['code' => $verification_code ])); 
-            session()->put('email', $request->email);   
-            return redirect()->route('verify');  
-                
-        } 
-        else {
+        if(!$create) {
             $validator->errors()->add('error', 'Register failed!');
             return redirect()->route('register')
                         ->withErrors($validator)
                         ->withInput();
         }  
        
+		Mail::to($request->email)->send(new VerificationCode(['code' => $verification_code ])); 
+		session()->put('email', $request->email);   
+		go_redirect_route('verify');
     }
  
     public function verify(Request $request) {
@@ -81,20 +78,17 @@ class FrontendController extends Controller
         }  
         $verification_code = $request->verification_code;
         $data = Doctor::checkVerificationCode(['email' => $email, 'code' => $verification_code]);
-        if($data) { 
-            session()->forget('email');
-            session()->put('id', $data->id); 
-            $data->update(['status' => 1]);  
-            return redirect()->route('doctorinfo');  
-        } 
-        else {  
+        if(!$data) {
             $validator->errors()->add('error', 'Verification code invalid!');
             return redirect()->route('verify')
                         ->withErrors($validator)
                         ->withInput(); 
         }   
-        
- 
+         
+		session()->forget('email');
+		session()->put('id', $data->id); 
+		$data->update(['status' => 1]);  
+		go_redirect_route('doctorinfo');  
     } 
     
     public function doctorInfo(Request $request) {
@@ -139,7 +133,7 @@ class FrontendController extends Controller
         }
 		session()->forget('id'); 
 		session()->put('doctor_id', $id);  
-		return redirect()->route('patientinfo');
+		go_redirect_route('patientinfo');
     }
     
     public function patientInfo(Request $request) {
@@ -192,17 +186,13 @@ class FrontendController extends Controller
                         ->withInput(); 
         }
 		session()->put('patientid', $createId);  
-		go_beforeandafterphoto();
+		go_redirect_route('beforeandafterphoto');
     }
 	
 	public function check_consent_form(Request $request, $arrData) {		 
         if(isset($request->consent_form) && $request->consent_form != "") {
             $arrData['consent_form']  = Common::uploadFile($request->consent_form);  
         }
-	}
-	
-	private function go_beforeandafterphoto() {
-	   return redirect()->route('beforeandafterphoto'); 
 	}
  
     public function beforeandafterphoto(Request $request) {
@@ -244,20 +234,17 @@ class FrontendController extends Controller
 
         ];
         $createId = BeforeAfterImage::create($arrData)->id;
-        if($createId) { 
-            session()->put('image_id', $createId);     
-            session()->put('patient_id', $patientid);  
-            session()->forget('patientid');  
-            return redirect()->route('proceduredetail');
-        }
-        else { 
+        if(!$createId) {
             $validator->errors()->add('error', 'Upload failed!');
             return redirect()->route('beforeandafterphoto')
                         ->withErrors($validator)
                         ->withInput(); 
-        }  
-
+        } 
         
+		session()->put('image_id', $createId);     
+		session()->put('patient_id', $patientid);  
+		session()->forget('patientid');  
+		go_redirect_route('proceduredetail');
     }
 		
     public function procedureDetail(Request $request) { 
@@ -322,7 +309,7 @@ class FrontendController extends Controller
 		session()->forget('doctor_id');
 		session()->forget('patient_id'); 
 		session()->forget('image_id');
-		return redirect()->route('reviewsubmission');       
+		go_redirect_route('reviewsubmission');       
     }  
  
     public function reviewSubmission(Request $request) {
@@ -337,7 +324,9 @@ class FrontendController extends Controller
     public function beforeandafterPhotocontest(Request $request) {
         return view('beforeandafter-photo-contest');
     }
-
-    
+    	
+	private function go_redirect_route(string $func) {
+	   return redirect()->route(func); 
+	}
 }
   
