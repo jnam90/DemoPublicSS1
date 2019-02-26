@@ -131,13 +131,8 @@ class FrontendController extends Controller
         if(!$doctor_id){ 
             return redirect()->route('register');  
         }       
-        if (!$request->isMethod('post')) { 
-            $arrAge = Doctor::generateListAge();
-            $arrGender = Doctor::$gender;
-            $arrDrinker = Doctor::$drinker;
-            $arrSmoker = Doctor::$smoker;
-            $arrRace = Doctor::$race; 
-            return view('patient-information', ['arrAge' => $arrAge, 'arrGender' => $arrGender, 'arrDrinker'=>$arrDrinker,'arrSmoker'=>$arrSmoker, 'arrRace' => $arrRace ]);  
+        if (!$request->isMethod('post')) {             
+			return get_patient_information();
         }  
         $validator = Validator::make($request->all(), [
             'firstname' => 'required',
@@ -178,6 +173,15 @@ class FrontendController extends Controller
 		session()->put('patientid', $createId);  
 		go_redirect_route_completed('beforeandafterphoto');
     }
+	
+	private function get_patient_information() {		
+		$arrAge = Doctor::generateListAge();
+		$arrGender = Doctor::$gender;
+		$arrDrinker = Doctor::$drinker;
+		$arrSmoker = Doctor::$smoker;
+		$arrRace = Doctor::$race; 
+		return view('patient-information', ['arrAge' => $arrAge, 'arrGender' => $arrGender, 'arrDrinker'=>$arrDrinker,'arrSmoker'=>$arrSmoker, 'arrRace' => $arrRace ]);  
+	}
 	
 	public function check_consent_form(Request $request, $arrData) {		 
         if(isset($request->consent_form) && $request->consent_form != "") {
@@ -243,33 +247,12 @@ class FrontendController extends Controller
             return go_redirect_route_completed('register'); 
         }  
         if (!$request->isMethod('post')) {
-            //return getProcedureDetail($image_id); 
-			$list_image = BeforeAfterImage::where("id", $image_id)->first(); 
-			$location = Submission::$location;
-			$treatmentarea = Submission::$treatmentarea;
-			$product = Submission::$product;
-			return view('procedure-details', ['list_image' => $list_image, 'location' => $location,	'treatmentarea' => $treatmentarea, 'product' => $product]); 
+            return get_procedure_details($image_id); 
         } 
         $validator = Validator::make($request->all(), ['location' => 'required', 'treatment_area' => 'required', 'product' => 'required', 'qty' => 'required', ]);  
         if ($validator->fails()) {
             return go_redirect_route_error('proceduredetail', $validator);			
         }
-        /*$treatment_used = [];		
-        $doctor_id = session()->get('doctor_id');
-        $patient_id = session()->get('patient_id');
-        $request_location = $request->location;
-        $request_treatment_area = $request->treatment_area;
-        $request_product = $request->product;
-        $request_qty = $request->qty;
-        foreach( $request_location as $key => $value) {
-            $arr = ["location" => $request_location[$key],
-                    'treatment_area' => $request_treatment_area[$key],
-                    'product' => $request_product[$key],
-                    'qty' => $request_qty[$key],
-            ];
-            $treatment_used[] = $arr;
-        }
-        $treatment_used = $treatment_used;*/
         $arrData = [ 
             'addition_infomation' => $request->addition_infomation,
             'doctor_id' => $doctor_id,
@@ -290,6 +273,14 @@ class FrontendController extends Controller
 		session()->forget('image_id');
 		go_redirect_route_completed('reviewsubmission');       
     }  
+		
+	private function get_procedure_details(var $image_id) {		
+		$list_image = BeforeAfterImage::where("id", $image_id)->first(); 
+		$location = Submission::$location;
+		$treatmentarea = Submission::$treatmentarea;
+		$product = Submission::$product;
+		return view('procedure-details', ['list_image' => $list_image, 'location' => $location,	'treatmentarea' => $treatmentarea, 'product' => $product]); 
+	}
 	
 	private function create_treatment_used(Request $request) {
 		$treatment_used = [];		
@@ -327,7 +318,7 @@ class FrontendController extends Controller
 	   return redirect()->route($func); 
 	}
 	
-	private function go_redirect_route_error(string $func, $validator) {
+	private function go_redirect_route_error(string $func, var $validator) {
 		return redirect()->route($func)
                         ->withErrors($validator)
                         ->withInput();   
