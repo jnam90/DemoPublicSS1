@@ -282,7 +282,7 @@ class FrontendController extends Controller
         } 
         $doctor_id = session()->get('doctor_id');
         $patient_id = session()->get('patient_id');
-        $validator = Validator::make($request->all(), [
+        /*$validator = Validator::make($request->all(), [
             'location' => 'required',
             'treatment_area' => 'required',
             'product' => 'required',
@@ -292,7 +292,7 @@ class FrontendController extends Controller
             return redirect()->route('proceduredetail')
                         ->withErrors($validator) 
                         ->withInput();
-        }  
+        } */ 
         $treatment_used = [];
         $request_location = $request->location;
         $request_treatment_area = $request->treatment_area;
@@ -323,11 +323,11 @@ class FrontendController extends Controller
             session()->forget('doctor_id');
             session()->forget('patient_id'); 
             session()->forget('image_id');
-            redirect()->route('reviewsubmission'); 
+            return redirect()->route('reviewsubmission'); 
         } 
         else {
             $validator->errors()->add('error', 'Add info failed!');
-            redirect()->route('proceduredetail')
+            return redirect()->route('proceduredetail')
                         ->withErrors($validator)
                         ->withInput();   
         }        
