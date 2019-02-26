@@ -190,16 +190,19 @@ class FrontendController extends Controller
             return redirect()->route('patientinfo')
                         ->withErrors($validator)
                         ->withInput(); 
-        } else {
-			session()->put('patientid', $createId);  
-			return redirect()->route('beforeandafterphoto');  
-		}
+        }
+		session()->put('patientid', $createId);  
+		go_beforeandafterphoto();
     }
 	
 	public function check_consent_form(Request $request, $arrData) {		 
         if(isset($request->consent_form) && $request->consent_form != "") {
             $arrData['consent_form']  = Common::uploadFile($request->consent_form);  
         }
+	}
+	
+	private function go_beforeandafterphoto() {
+	   return redirect()->route('beforeandafterphoto'); 
 	}
  
     public function beforeandafterphoto(Request $request) {
