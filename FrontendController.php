@@ -148,13 +148,12 @@ class FrontendController extends Controller
             return redirect()->route('register');  
         }       
         if (!$request->isMethod('post')) { 
-             $arrAge = Doctor::generateListAge();
+            $arrAge = Doctor::generateListAge();
             $arrGender = Doctor::$gender;
             $arrDrinker = Doctor::$drinker;
             $arrSmoker = Doctor::$smoker;
             $arrRace = Doctor::$race; 
             return view('patient-information', ['arrAge' => $arrAge, 'arrGender' => $arrGender, 'arrDrinker'=>$arrDrinker,'arrSmoker'=>$arrSmoker, 'arrRace' => $arrRace ]);  
-
         }  
         $validator = Validator::make($request->all(), [
             'firstname' => 'required',
@@ -163,8 +162,7 @@ class FrontendController extends Controller
             'gender' => 'required',
             'smoker' => 'required',
             'race' => 'required',
-            'drinker'  => 'required',
-            
+            'drinker'  => 'required',            
             ]);   
         if ($validator->fails()) {
             return redirect()->route('patientinfo')
@@ -181,11 +179,11 @@ class FrontendController extends Controller
             'drinker' => $request->drinker,
 
         ]; 
-        if(isset($request->consent_form) && $request->consent_form != "") {
+        /*if(isset($request->consent_form) && $request->consent_form != "") {
             $file = $request->consent_form;
             $path = Common::uploadFile($file);
             $arrData['consent_form']  = $path;  
-        } 
+        } */
         $createId = Patient::create($arrData)->id; 
         if(!$createId) {
             $validator->errors()->add('error', 'Add info failed!');
@@ -193,6 +191,7 @@ class FrontendController extends Controller
                         ->withErrors($validator)
                         ->withInput(); 
         }  
+		
 		session()->put('patientid', $createId);  
 		return redirect()->route('beforeandafterphoto');  
     }
